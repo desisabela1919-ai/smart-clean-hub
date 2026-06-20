@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Karyawan - Smart Clean Hub</title>
+    
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+    <div class="mobile-container">
+        <div class="auth-header">
+            <div class="logo">🛡️ SCH</div>
+            <h1>Pendaftaran Akun</h1>
+            <p>Silakan isi data diri Anda untuk mengajukan akun karyawan baru</p>
+        </div>
+
+        <form id="registerForm" class="auth-form">
+            <div class="input-group">
+                <label for="regNama">Nama Lengkap</label>
+                <input type="text" id="regNama" placeholder="Masukkan nama lengkap Anda" required>
+            </div>
+
+            <div class="input-group">
+                <label for="regWhatsapp">Nomor WhatsApp</label>
+                <input type="tel" id="regWhatsapp" placeholder="Contoh: 08123456789" required>
+            </div>
+
+            <div class="input-group">
+                <label for="regPassword">Password</label>
+                <input type="password" id="regPassword" placeholder="Buat password minimal 6 karakter" required>
+            </div>
+
+            <div class="input-group">
+                <label for="regPasswordConfirm">Konfirmasi Password</label>
+                <input type="password" id="regPasswordConfirm" placeholder="Ulangi password Anda" required>
+            </div>
+
+            <button type="submit" class="btn-primary" id="btnRegister">Ajukan Pendaftaran</button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Sudah punya akun atau sudah di-approve?</p>
+            <a href="index.html">Kembali ke Halaman Login</a>
+        </div>
+    </div>
+
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>
