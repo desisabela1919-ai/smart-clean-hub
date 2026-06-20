@@ -1,6 +1,6 @@
 // js/register.js
 import { auth, db } from "./firebase-config.js";
-import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const btnRegister = document.getElementById("register-btn");
@@ -13,13 +13,13 @@ if (btnRegister) {
         const whatsappField = document.getElementById("regWhatsapp");
         const passwordField = document.getElementById("regPassword");
         const confirmPasswordField = document.getElementById("regPasswordConfirm");
-        const roleField = document.getElementById("regRole"); // Ambil elemen dropdown role baru
+        const roleField = document.getElementById("regRole");
 
         const nama = namaField.value.trim();
         let whatsapp = whatsappField.value.trim();
         const password = passwordField.value;
         const confirmPassword = confirmPasswordField.value;
-        const roleTerpilih = roleField ? roleField.value : "karyawan"; // Default ke karyawan jika element tidak ditemukan
+        const roleTerpilih = roleField ? roleField.value : "karyawan";
 
         // Validasi input kosong
         if (!nama || !whatsapp || !password || !confirmPassword || !roleTerpilih) {
@@ -39,7 +39,7 @@ if (btnRegister) {
             return;
         }
 
-        // Bersihkan format nomor WhatsApp (ubah 08 menjadi format internasional 62 jika diperlukan)
+        // Bersihkan format nomor WhatsApp (ubah 08 menjadi format internasional 62)
         if (whatsapp.startsWith("0")) {
             whatsapp = "62" + whatsapp.slice(1);
         }
@@ -55,19 +55,22 @@ if (btnRegister) {
             const userCredential = await createUserWithEmailAndPassword(auth, virtualEmail, password);
             const user = userCredential.user;
 
-            // Langkah 2: Simpan profil lengkap ke Cloud Firestore secara dinamis mengikuti roleTerpilih
+            // Langkah 2: Simpan profil lengkap ke Cloud Firestore dengan status 'pending'
             await setDoc(doc(db, "users", user.uid), {
                 nama: nama,
                 whatsapp: whatsapp,
-                nik: whatsapp, // NIK diisi dengan nomor WhatsApp sebagai ID unik karyawan/TL
-                role: roleTerpilih, // Menyimpan "karyawan" atau "tl" sesuai pilihan di form
-                status: "pending" // Menunggu persetujuan admin Anda di dasbor Super Admin
+                nik: whatsapp,
+                role: roleTerpilih,
+                status: "pending" 
             });
+
+            // Langkah 3: PROTEKSI UTAMA - Langsung paksa keluar agar tidak otomatis bypass login
+            await signOut(auth);
 
             // Berikan label teks yang rapi di alert pemberitahuan
             const teksJabatan = roleTerpilih === "tl" ? "Team Leader (TL)" : "Cleaner / CS";
 
-            alert(`✅ Pendaftaran Berhasil!\nAkun Anda sebagai ${teksJabatan} atas nama ${nama} telah diajukan. Silakan hubungi Mas Adriansyah untuk persetujuan akun.`);
+            alert(`✅ Pendaftaran Berhasil!\n\nAkun Anda sebagai ${teksJabatan} atas nama ${nama} telah diajukan.\n\nStatus: MENUNGGU PERSETUJUAN OWNER.\nSilakan hubungi Mas Adriansyah untuk aktivasi akun.`);
             
             // Kembalikan ke halaman login
             window.location.href = "index.html";
