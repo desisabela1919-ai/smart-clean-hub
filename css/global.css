@@ -1,0 +1,41 @@
+/* Kunci Warna Tema SMART CLEAN HUB */
+:root {
+    --primary-blue: #0056b3;
+    --light-blue: #e6f0fa;
+    --accent-blue: #007bff;
+    --pure-white: #ffffff;
+    --dark-grey: #333333;
+    --light-grey: #f8f9fa;
+    --pending-yellow: #ffc107;
+    --success-green: #28a745;
+}
+
+/* Reset Dasar Browser */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--light-grey);
+    color: var(--dark-grey);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Container khusus agar tampilan selalu pas di layar Handphone */
+.mobile-container {
+    width: 100%;
+    max-width: 480px; 
+    min-height: 100vh;
+    background-color: var(--pure-white);
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    position: relative;
+}
