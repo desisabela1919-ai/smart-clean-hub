@@ -38,7 +38,14 @@
                 <input type="password" id="regPasswordConfirm" placeholder="Ulangi password Anda" required>
             </div>
 
-            <!-- ID tombol disamakan menjadi register-btn agar terbaca oleh JS -->
+            <div class="input-group">
+                <label for="regRole">Pilih Jabatan / Posisi</label>
+                <select id="regRole" required style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; background-color: #fff; box-sizing: border-box; font-family: inherit; color: #333;">
+                    <option value="karyawan">🧹 Cleaner / CS (Karyawan)</option>
+                    <option value="tl">👔 Team Leader (TL)</option>
+                </select>
+            </div>
+
             <button type="submit" class="btn-primary" id="register-btn">Ajukan Pendaftaran</button>
         </form>
 
@@ -48,7 +55,6 @@
         </div>
     </div>
 
-    <!-- Panggilan script sudah diperbaiki ke js/register.js -->
     <script type="module" src="js/register.js"></script>
 </body>
 </html>
