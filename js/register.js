@@ -13,14 +13,16 @@ if (btnRegister) {
         const whatsappField = document.getElementById("regWhatsapp");
         const passwordField = document.getElementById("regPassword");
         const confirmPasswordField = document.getElementById("regPasswordConfirm");
+        const roleField = document.getElementById("regRole"); // Ambil elemen dropdown role baru
 
         const nama = namaField.value.trim();
         let whatsapp = whatsappField.value.trim();
         const password = passwordField.value;
         const confirmPassword = confirmPasswordField.value;
+        const roleTerpilih = roleField ? roleField.value : "karyawan"; // Default ke karyawan jika element tidak ditemukan
 
         // Validasi input kosong
-        if (!nama || !whatsapp || !password || !confirmPassword) {
+        if (!nama || !whatsapp || !password || !confirmPassword || !roleTerpilih) {
             alert("⚠️ Semua kolom wajib diisi!");
             return;
         }
@@ -53,16 +55,19 @@ if (btnRegister) {
             const userCredential = await createUserWithEmailAndPassword(auth, virtualEmail, password);
             const user = userCredential.user;
 
-            // Langkah 2: Simpan profil lengkap ke Cloud Firestore
+            // Langkah 2: Simpan profil lengkap ke Cloud Firestore secara dinamis mengikuti roleTerpilih
             await setDoc(doc(db, "users", user.uid), {
                 nama: nama,
                 whatsapp: whatsapp,
-                nik: whatsapp, // NIK diisi dengan nomor WhatsApp sebagai ID unik karyawan
-                role: "karyawan",
-                status: "pending" // Menunggu persetujuan admin Anda di dasbor
+                nik: whatsapp, // NIK diisi dengan nomor WhatsApp sebagai ID unik karyawan/TL
+                role: roleTerpilih, // Menyimpan "karyawan" atau "tl" sesuai pilihan di form
+                status: "pending" // Menunggu persetujuan admin Anda di dasbor Super Admin
             });
 
-            alert(`✅ Pendaftaran Berhasil!\nAkun Anda atas nama ${nama} telah diajukan. Silakan hubungi Mas Adriansyah untuk persetujuan akun.`);
+            // Berikan label teks yang rapi di alert pemberitahuan
+            const teksJabatan = roleTerpilih === "tl" ? "Team Leader (TL)" : "Cleaner / CS";
+
+            alert(`✅ Pendaftaran Berhasil!\nAkun Anda sebagai ${teksJabatan} atas nama ${nama} telah diajukan. Silakan hubungi Mas Adriansyah untuk persetujuan akun.`);
             
             // Kembalikan ke halaman login
             window.location.href = "index.html";
