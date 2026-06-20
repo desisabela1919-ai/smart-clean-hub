@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TL Dashboard - Smart Clean Hub</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+    <div class="mobile-container">
+        <!-- Header Dashboard -->
+        <div class="dash-header">
+            <div class="user-info">
+                <span class="avatar">👔</span>
+                <div>
+                    <h3 id="tlNama">Nama Team Leader</h3>
+                    <p id="tlNIK">ID: TL001</p>
+                </div>
+            </div>
+            <button id="btnLogout" class="btn-logout">Keluar</button>
+        </div>
+
+        <!-- Konten Utama (Dinamis Berubah Sesuai Menu) -->
+        <div class="dash-content">
+            
+            <!-- SEKSI 1: PERMINTAAN AKUN BARU (APPROVAL) -->
+            <section id="section-approval" class="menu-section">
+                <div class="section-title">
+                    <h2>Permintaan Akun Baru</h2>
+                    <span class="badge-count" id="count-pending">0</span>
+                </div>
+                <div id="list-pending-karyawan" class="list-container">
+                    <!-- Data karyawan pending akan muncul otomatis di sini via JS -->
+                    <p class="empty-state">Tidak ada pendaftaran baru.</p>
+                </div>
+            </section>
+
+            <!-- SEKSI 2: MENU CEPAT OPERASIONAL TL -->
+            <section id="section-menu" class="menu-section">
+                <h2>Operasional Lapangan</h2>
+                <div class="grid-menu">
+                    <button class="menu-card">
+                        <span class="icon">📍</span>
+                        <span>Buat Area</span>
+                    </button>
+                    <button class="menu-card">
+                        <span class="icon">📋</span>
+                        <span>Checklist BM</span>
+                    </button>
+                    <button class="menu-card">
+                        <span class="icon">📅</span>
+                        <span>Buat Jadwal</span>
+                    </button>
+                    <button class="menu-card">
+                        <span class="icon">⚡</span>
+                        <span>Extra Job</span>
+                    </button>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Bottom Navigation Bar (Menu Bawah Khas Aplikasi HP) -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Beranda</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">✅</span>
+                <span class="nav-label">Verifikasi</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Rekap BM</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Hubungkan ke logika khusus Dashboard Team Leader -->
+    <script type="module" src="js/dashboard-tl.js"></script>
+</body>
+</html>
