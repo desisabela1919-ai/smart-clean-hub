@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Karyawan - Smart Clean Hub</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+    <div class="mobile-container">
+        <div class="dash-header">
+            <div class="user-info">
+                <span class="avatar">🧹</span>
+                <div>
+                    <h3 id="csNama">Nama Karyawan</h3>
+                    <p id="csNIK">ID: CS000</p>
+                </div>
+            </div>
+            <button id="btnLogout" class="btn-logout">Keluar</button>
+        </div>
+
+        <div class="dash-content">
+            
+            <section class="menu-section" style="margin-bottom: 20px;">
+                <h2>Statistik Bulan Ini</h2>
+                <div class="stat-card" style="background-color: var(--light-blue); padding: 15px; border-radius: 8px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600; color: var(--primary-blue);">Total Masuk Kerja:</span>
+                    <span id="total-absen" style="font-size: 1.2rem; font-weight: bold; color: var(--primary-blue);">0 Hari</span>
+                </div>
+            </section>
+
+            <section class="menu-section" style="margin-bottom: 25px;">
+                <h2>Absensi Kehadiran</h2>
+                <div class="attendance-box" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+                    <div id="camera-area" style="display: none; flex-direction: column; gap: 10px; align-items: center;">
+                        <video id="video" width="100%" height="auto" autoplay style="border-radius: 8px; background: #000; transform: scaleX(-1);"></video>
+                        <button id="btn-capture" class="btn-primary" style="width: 100%; background-color: var(--accent-blue);">Ambil Foto Bukti</button>
+                        <canvas id="canvas" style="display:none;"></canvas>
+                    </div>
+
+                    <button id="btn-absen-masuk" class="btn-primary" style="background-color: var(--success-green); width: 100%;">📸 Absen Masuk (Selfie)</button>
+                    <button id="btn-absen-pulang" class="btn-primary" style="background-color: #dc3545; width: 100%; display: none;">🚪 Selesai Kerja (Absen Pulang)</button>
+                    
+                    <p id="absen-status" style="font-size: 0.85rem; color: #666; text-align: center; margin-top: 5px;">Status: Belum Absen Hari Ini</p>
+                </div>
+            </section>
+
+            <section class="menu-section">
+                <h2>Tugas Area Hari Ini</h2>
+                <div id="list-tugas-karyawan" class="list-container" style="margin-top: 10px;">
+                    <p class="empty-state">Belum ada penugasan area dari Team Leader.</p>
+                </div>
+            </section>
+
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Beranda</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">📷</span>
+                <span class="nav-label">Foto Tugas</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">⚠️</span>
+                <span class="nav-label">Isu Lapangan</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">✉️</span>
+                <span class="nav-label">Cuti/Izin</span>
+            </a>
+        </nav>
+    </div>
+
+    <script type="module" src="js/dashboard-cs.js"></script>
+</body>
+</html>
