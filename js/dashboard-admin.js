@@ -6,6 +6,7 @@ import {
     doc, 
     getDoc, 
     updateDoc,
+    deleteDoc,
     collection, 
     query, 
     where, 
@@ -18,7 +19,6 @@ import {
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        // Ambil data profil untuk memastikan role adalah admin
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
             const userData = userDoc.data();
@@ -27,10 +27,10 @@ onAuthStateChanged(auth, async (user) => {
                 window.location.href = "index.html";
                 return;
             }
-            // Jalankan semua fungsi monitoring admin jika sukses
             muatStatistikAdmin();
             pantauLogAbsensiHariIni();
             pantauPendaftaranKaryawan(); 
+            pantauKaryawanAktif(); 
         }
     } else {
         window.location.href = "index.html";
@@ -53,7 +53,6 @@ if (btnLogout) {
 // ==========================================
 async function muatStatistikAdmin() {
     try {
-        // Hitung total Cleaner / CS aktif
         const qKaryawan = query(collection(db, "users"), where("role", "==", "karyawan"), where("status", "==", "approved"));
         const snapshotKaryawan = await getDocs(qKaryawan);
         const totalKaryawanBadge = document.getElementById("total-karyawan");
@@ -61,10 +60,9 @@ async function muatStatistikAdmin() {
             totalKaryawanBadge.innerText = snapshotKaryawan.size;
         }
 
-        // Hitung total Team Leader (TL) aktif jika elemen badge-nya tersedia di HTML
         const qTL = query(collection(db, "users"), where("role", "==", "tl"), where("status", "==", "approved"));
         const snapshotTL = await getDocs(qTL);
-        const totalTLBadge = document.getElementById("total-tl"); // Pasang ID ini di HTML jika mau memunculkan angka TL
+        const totalTLBadge = document.getElementById("total-tl"); 
         if (totalTLBadge) {
             totalTLBadge.innerText = snapshotTL.size;
         }
@@ -101,8 +99,6 @@ function pantauLogAbsensiHariIni() {
 
         querySnapshot.forEach((docSnap) => {
             const log = docSnap.data();
-            
-            // Tambahkan label penunjuk role di log absen agar Owner tahu siapa yang absen (TL/CS)
             const labelRoleAbsen = log.role === "tl" ? "👔 TL" : "🧹 CS";
 
             const cardLog = document.createElement("div");
@@ -121,7 +117,6 @@ function pantauLogAbsensiHariIni() {
             listLogContainer.appendChild(cardLog);
         });
 
-        // MODAL KLIK CEK BUKTI MENGGUNAKAN TRICK DOWNLOAD / LIHAT MAPS
         const btnBukti = document.querySelectorAll(".btn-approve");
         btnBukti.forEach(btn => {
             btn.addEventListener("click", (e) => {
@@ -132,10 +127,8 @@ function pantauLogAbsensiHariIni() {
                 const lat = targetBtn.getAttribute("data-lat");
                 const lon = targetBtn.getAttribute("data-lon");
                 
-                // 1. Tampilkan info koordinat GPS & sediakan link Google Maps
                 alert(`📍 Log Absen: ${namaTim}\nKoordinat GPS: ${lat}, ${lon}\n\nKlik OK untuk mengunduh foto selfie secara instan.`);
                 
-                // 2. Trik download paksa berkas Base64 menjadi file gambar .jpg asli di laptop
                 const linkDownload = document.createElement("a");
                 linkDownload.href = urlFotoBase64;
                 linkDownload.download = `Selfie_${namaTim}_${tipeAbsen}_${new Date().toISOString().slice(0,10)}.jpg`;
@@ -143,7 +136,6 @@ function pantauLogAbsensiHariIni() {
                 linkDownload.click();
                 document.body.removeChild(linkDownload);
 
-                // 3. Otomatis bukakan peta lokasi penugasan di tab baru (Perbaikan bug variabel coords)
                 window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank');
             });
         });
@@ -151,14 +143,13 @@ function pantauLogAbsensiHariIni() {
 }
 
 // ==========================================
-// 4. PANTAU & SETUJUI PENDAFTARAN KARYAWAN & TL BARU
+// 4. PANTAU, SETUJUI, ATAU TOLAK PENDAFTARAN BARU
 // ==========================================
 function pantauPendaftaranKaryawan() {
     const listPersetujuanContainer = document.getElementById("list-persetujuan-tim") || document.getElementById("list-log-absen");
     
     if (!listPersetujuanContainer) return;
 
-    // PERBAIKAN: Mengambil seluruh permohonan pendaftaran baru (pending) tanpa batas role
     const qPending = query(
         collection(db, "users"), 
         where("status", "==", "pending")
@@ -180,7 +171,6 @@ function pantauPendaftaranKaryawan() {
             const dataUser = docSnap.data();
             const docId = docSnap.id; 
 
-            // Penentuan Teks Badge Jabatan & Gaya Warna Visual secara Dinamis
             const labelRole = dataUser.role === "tl" ? "👔 Team Leader (TL)" : "🧹 Cleaner / CS";
             const warnaBgBadge = dataUser.role === "tl" ? "#cce5ff" : "#fff3cd";
             const warnaTeksBadge = dataUser.role === "tl" ? "#004085" : "#856404";
@@ -210,9 +200,14 @@ function pantauPendaftaranKaryawan() {
                         </span>
                     </div>
                 </div>
-                <button class="btn-action-approve" data-id="${docId}" data-nama="${dataUser.nama}" data-role="${labelRole}" style="background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                    Setujui ✔
-                </button>
+                <div class="action-buttons" style="display: flex; gap: 8px;">
+                    <button class="btn-action-approve" data-id="${docId}" data-nama="${dataUser.nama}" data-role="${labelRole}" style="background-color: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px;">
+                        Setujui ✔
+                    </button>
+                    <button class="btn-action-reject" data-id="${docId}" data-nama="${dataUser.nama}" data-role="${labelRole}" style="background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px;">
+                        Tolak ✖
+                    </button>
+                </div>
             `;
 
             listPersetujuanContainer.insertBefore(cardApprove, listPersetujuanContainer.firstChild);
@@ -239,6 +234,114 @@ function pantauPendaftaranKaryawan() {
                     } catch (err) {
                         console.error("Gagal menyetujui akun:", err);
                         alert("⚠️ Terjadi kesalahan saat menyetujui akun.");
+                    }
+                }
+            });
+        });
+
+        const tombolReject = document.querySelectorAll(".btn-action-reject");
+        tombolReject.forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+                const targetBtn = e.target.closest(".btn-action-reject");
+                const uidUser = targetBtn.getAttribute("data-id");
+                const namaUser = targetBtn.getAttribute("data-nama");
+                const jabatanUser = targetBtn.getAttribute("data-role");
+
+                const konfirmasi = confirm(`❌ Apakah Anda yakin ingin MENOLAK & MENGHAPUS pendaftaran akun ${jabatanUser} atas nama: ${namaUser}?\n\nData pendaftaran akan hilang permanen dari database.`);
+                if (konfirmasi) {
+                    try {
+                        const userRef = doc(db, "users", uidUser);
+                        await deleteDoc(userRef);
+
+                        alert(`🗑️ Pendaftaran ${namaUser} telah ditolak dan datanya sukses dihapus secara permanen.`);
+                        muatStatistikAdmin(); 
+                    } catch (err) {
+                        console.error("Gagal menghapus pendaftaran:", err);
+                        alert("⚠️ Terjadi kesalahan saat menolak/menghapus akun.");
+                    }
+                }
+            });
+        });
+    });
+}
+
+// ==========================================
+// 5. KELOLA TIM AKTIF (HAPUS / PECAT KARYAWAN & TL)
+// ==========================================
+function pantauKaryawanAktif() {
+    const listKaryawanContainer = document.getElementById("list-karyawan-aktif");
+    if (!listKaryawanContainer) return;
+
+    const qAktif = query(
+        collection(db, "users"), 
+        where("status", "==", "approved")
+    );
+
+    onSnapshot(qAktif, (querySnapshot) => {
+        listKaryawanContainer.innerHTML = "";
+        let totalKaryawanTerpajang = 0;
+
+        querySnapshot.forEach((docSnap) => {
+            const dataUser = docSnap.data();
+            const docId = docSnap.id; 
+
+            if (dataUser.role === "admin") return;
+            totalKaryawanTerpajang++;
+
+            const labelRole = dataUser.role === "tl" ? "👔 Team Leader (TL)" : "🧹 Cleaner / CS";
+            const warnaGarisSamping = dataUser.role === "tl" ? "5px solid #007bff" : "5px solid #28a745";
+
+            const cardKaryawan = document.createElement("div");
+            cardKaryawan.className = "approve-card";
+            cardKaryawan.style.borderLeft = warnaGarisSamping; 
+            cardKaryawan.style.marginBottom = "10px";
+            cardKaryawan.style.padding = "10px";
+            cardKaryawan.style.backgroundColor = "#fff";
+            cardKaryawan.style.borderRadius = "8px";
+            cardKaryawan.style.display = "flex";
+            cardKaryawan.style.justifyContent = "space-between";
+            cardKaryawan.style.alignItems = "center";
+
+            cardKaryawan.innerHTML = `
+                <div class="info">
+                    <h4 style="margin:0; color:#333;">${dataUser.nama}</h4>
+                    <p style="margin:5px 0 0 0; font-size:13px; color:#666;">WhatsApp: <b>0${dataUser.whatsapp ? dataUser.whatsapp.slice(2) : ''}</b></p>
+                    <span style="font-size:11px; background:#f1f3f5; color:#495057; padding:2px 6px; border-radius:4px; font-weight: bold; display:inline-block; margin-top:5px;">
+                        ${labelRole}
+                    </span>
+                </div>
+                <button class="btn-action-terminate" data-id="${docId}" data-nama="${dataUser.nama}" data-role="${labelRole}" style="background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px;">
+                    Hapus 🗑️
+                </button>
+            `;
+
+            listKaryawanContainer.appendChild(cardKaryawan);
+        });
+
+        if (totalKaryawanTerpajang === 0) {
+            listKaryawanContainer.innerHTML = '<p class="empty-state">Belum ada karyawan atau TL aktif yang terdaftar.</p>';
+        }
+
+        const tombolTerminate = document.querySelectorAll(".btn-action-terminate");
+        tombolTerminate.forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+                const targetBtn = e.target.closest(".btn-action-terminate");
+                const uidUser = targetBtn.getAttribute("data-id");
+                const namaUser = targetBtn.getAttribute("data-nama");
+                const jabatanUser = targetBtn.getAttribute("data-role");
+
+                const cek1 = confirm(`⚠️ PERINGATAN KRUSIAL!\nApakah Anda yakin ingin MENGHAPUS AKUN ${jabatanUser} atas nama: ${namaUser}?`);
+                if (cek1) {
+                    const cek2 = confirm(`🔴 KONFIRMASI TERAKHIR!\nKaryawan tersebut akan dipecat secara sistem. Akun akan DIBLOKIR total dan namanya langsung hilang dari seluruh aplikasi Smart Clean Hub.\n\nLanjutkan memecat ${namaUser}?`);
+                    if (cek2) {
+                        try {
+                            await deleteDoc(doc(db, "users", uidUser));
+                            alert(`🗑️ Sukses! Akun ${namaUser} telah resmi dihapus dan akses masuknya telah diblokir.`);
+                            muatStatistikAdmin(); 
+                        } catch (err) {
+                            console.error("Gagal memecat karyawan:", err);
+                            alert("⚠️ Terjadi kesalahan saat memproses penghapusan akun.");
+                        }
                     }
                 }
             });
