@@ -1,6 +1,6 @@
 // js/dashboard-cs.js
 
-import { auth, db, storage } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js"; // Membuang import storage yang tidak terpakai
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { 
     doc, 
@@ -11,11 +11,6 @@ import {
     getDocs, 
     addDoc 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { 
-    ref, 
-    uploadString, 
-    getDownloadURL 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 let userUID = "";
 let userNama = "";
@@ -120,13 +115,14 @@ btnCapture.addEventListener("click", () => {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext("2d");
+    
     // Efek mirror agar hasil selfie normal tidak terbalik
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    // Ubah hasil jepretan menjadi string Base64 Gambar
-    const dataFotoBase64 = canvas.toDataURL("image/jpeg");
+    // Ubah hasil jepretan menjadi string Base64 Gambar & dikompres (0.5) agar ringan di Firestore
+    const dataFotoBase64 = canvas.toDataURL("image/jpeg", 0.5);
 
     // Matikan Kamera Kembali demi menghemat baterai HP karyawan
     streamKamera.getTracks().forEach(track => track.stop());
@@ -140,7 +136,7 @@ btnCapture.addEventListener("click", () => {
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
                 
-                // Eksekusi kirim data lengkap ke Firebase
+                // Eksekusi kirim data langsung tanpa lewat Storage lagi
                 simpanAbsensiKeFirebase(tipeAbsenAktif, dataFotoBase64, lat, lon);
             },
             (error) => {
@@ -155,23 +151,16 @@ btnCapture.addEventListener("click", () => {
 });
 
 // ==========================================
-// 4. SIMPAN BUKTI FOTO & DATA ABSEN KE FIREBASE
+// 4. SIMPAN BUKTI DATA & FOTO LANGSUNG KE FIRESTORE (SOLUSI GRATIS & ANTI MACET)
 // ==========================================
 async function simpanAbsensiKeFirebase(tipe, fotoBase64, latitude, longitude) {
     statusText.innerText = "⏳ Mengunggah data absensi digital...";
-    const timestampNamaFile = new Date().getTime();
-    
-    // A. Upload Foto Selfie ke Gudang Firebase Storage
-    const storageRef = ref(storage, `selfie_absen/${userNIK}_${tipe}_${timestampNamaFile}.jpg`);
     
     try {
-        const uploadSnapshot = await uploadString(storageRef, fotoBase64, 'data_url');
-        const urlFotoResmi = await getDownloadURL(uploadSnapshot.ref);
-
         const waktuWIB = new Date();
         const stringTanggalHariIni = waktuWIB.toLocaleDateString('id-ID');
 
-        // B. Simpan Log Catatan Absen ke Buku Firestore Database
+        // Simpan Log Catatan Absen + String Foto ke Buku Firestore Database
         await addDoc(collection(db, "attendance"), {
             uid: userUID,
             nik: userNIK,
@@ -179,7 +168,7 @@ async function simpanAbsensiKeFirebase(tipe, fotoBase64, latitude, longitude) {
             tipe: tipe, // "Masuk" atau "Pulang"
             tanggal: stringTanggalHariIni,
             jam: waktuWIB.toLocaleTimeString('id-ID'),
-            fotoUrl: urlFotoResmi,
+            fotoUrl: fotoBase64, // <-- FOTO LANGSUNG MASUK SINI SEBAGAI TEKS AMAN
             koordinat: {
                 lat: latitude,
                 lon: longitude
