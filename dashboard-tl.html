@@ -6,6 +6,81 @@
     <title>TL Dashboard - Smart Clean Hub</title>
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        /* Gaya CSS Tambahan untuk Pop-up Modal yang Mobile-Friendly */
+        .modal-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+        .modal-content {
+            background: #fff;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease-out;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .modal-header h3 { margin: 0; color: #333; }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #aaa;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .btn-block {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
 
@@ -22,16 +97,14 @@
             <button id="btnLogout" class="btn-logout">Keluar</button>
         </div>
 
-        <!-- Konten Utama (Dinamis Berubah Sesuai Menu) -->
+        <!-- Konten Utama -->
         <div class="dash-content">
             
-            <!-- SEKSI TAMBAHAN: ABSENSI MANDIRI TEAM LEADER -->
-            <section id="section-absen-tl" class="menu-section" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 15px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid var(--accent-blue, #007bff);">
+            <!-- SEKSI 1: ABSENSI MANDIRI TEAM LEADER -->
+            <section id="section-absen-tl" class="menu-section" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 15px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid #007bff;">
                 <div class="section-title">
                     <h2>Absensi Mandiri TL</h2>
                 </div>
-                
-                <!-- Tombol Absen Masuk & Pulang -->
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
                     <button id="btn-absen-masuk" class="menu-card" style="flex: 1; background: #28a745; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">
                         📸 Absen Masuk
@@ -40,8 +113,6 @@
                         📸 Absen Pulang
                     </button>
                 </div>
-
-                <!-- Kamera Interaktif (Akan Terbuka Saat Tombol Diklik) -->
                 <div id="camera-area" style="display: none; flex-direction: column; align-items: center; gap: 10px; margin-top: 15px; background: #000; padding: 10px; border-radius: 8px;">
                     <video id="video" width="100%" height="auto" autoplay style="border-radius: 6px; transform: scaleX(-1);"></video>
                     <canvas id="canvas" style="display: none;"></canvas>
@@ -49,62 +120,120 @@
                         ⚡ Ambil Foto & Kirim GPS
                     </button>
                 </div>
-
-                <!-- Status Hasil Absen -->
                 <p id="absen-status" style="margin-top: 10px; font-size: 13px; color: #555; font-weight: 500; text-align: center;">
                     Status: Memuat status absensi...
                 </p>
             </section>
             
-            <!-- SEKSI 1: PERMINTAAN AKUN BARU (APPROVAL) -->
+            <!-- SEKSI 2: PERMINTAAN AKUN BARU (APPROVAL) -->
             <section id="section-approval" class="menu-section">
                 <div class="section-title">
                     <h2>Permintaan Akun Baru</h2>
                     <span class="badge-count" id="count-pending">0</span>
                 </div>
                 <div id="list-pending-karyawan" class="list-container">
-                    <!-- Data karyawan pending akan muncul otomatis di sini via JS -->
                     <p class="empty-state">Tidak ada pendaftaran baru.</p>
                 </div>
             </section>
 
-            <!-- SEKSI TAMBAHAN: DAFTAR TIM CLEANER (CS) UNTUK PENUGASAN -->
-            <section id="section-tim-cs" class="menu-section">
-                <div class="section-title">
-                    <h2>Monitoring Tim CS</h2>
-                </div>
-                <div id="list-cs-tim" class="list-container">
-                    <!-- Data tim CS aktif akan muncul otomatis di sini via JS -->
-                    <p class="empty-state">Memuat daftar CS...</p>
-                </div>
-            </section>
-
-            <!-- SEKSI 2: MENU CEPAT OPERASIONAL TL -->
+            <!-- SEKSI 3: OPERASIONAL LAPANGAN (AKTIFKAN TOMBOL) -->
             <section id="section-menu" class="menu-section">
                 <h2>Operasional Lapangan</h2>
                 <div class="grid-menu">
-                    <button class="menu-card">
+                    <!-- Ditambahkan ID khusus untuk diklik -->
+                    <button class="menu-card" id="btn-menu-buat-area">
                         <span class="icon">📍</span>
                         <span>Buat Area</span>
                     </button>
-                    <button class="menu-card">
+                    <button class="menu-card" id="btn-menu-checklist">
                         <span class="icon">📋</span>
                         <span>Checklist BM</span>
                     </button>
-                    <button class="menu-card">
+                    <button class="menu-card" style="opacity: 0.5; cursor: not-allowed;">
                         <span class="icon">📅</span>
                         <span>Buat Jadwal</span>
                     </button>
-                    <button class="menu-card">
+                    <button class="menu-card" style="opacity: 0.5; cursor: not-allowed;">
                         <span class="icon">⚡</span>
                         <span>Extra Job</span>
                     </button>
                 </div>
             </section>
 
+            <!-- SEKSI 4: MONITORING TIM CLEANER (CS) & PLOTING -->
+            <section id="section-tim-cs" class="menu-section">
+                <div class="section-title">
+                    <h2>Monitoring Tim CS & Ploting</h2>
+                </div>
+                <div id="list-cs-tim" class="list-container">
+                    <p class="empty-state">Memuat daftar CS...</p>
+                </div>
+            </section>
+
         </div>
 
-        <!-- Bottom Navigation Bar (Menu Bawah Khas Aplikasi HP) -->
+        <!-- ==========================================
+             MODAL POP-UP 1: BUAT AREA KERJA GEDUNG
+             ========================================== -->
+        <div id="modal-buat-area" class="modal-popup">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Tambah Area Kerja</h3>
+                    <button class="close-btn" id="close-modal-area">&times;</button>
+                </div>
+                <form id="form-tambah-area">
+                    <div class="form-group">
+                        <label>Nama Area / Lokasi Gedung</label>
+                        <input type="text" id="nama-area-input" class="form-control" placeholder="Contoh: Lobby Utama, Toilet Lt.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Deskripsi/Catatan Khusus</label>
+                        <input type="text" id="desc-area-input" class="form-control" placeholder="Contoh: Fokus pembersihan kaca depan">
+                    </div>
+                    <button type="submit" class="btn-block" style="background: #28a745;">Simpan Area Baru</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             MODAL POP-UP 2: PLOTING / TUNTUK AREA & CHECKLIST
+             ========================================== -->
+        <div id="modal-ploting-cs" class="modal-popup">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Ploting Tugas Cleaner</h3>
+                    <button class="close-btn" id="close-modal-ploting">&times;</button>
+                </div>
+                <form id="form-ploting-tugas">
+                    <!-- Hidden ID untuk menampung UID CS yang dipilih -->
+                    <input type="hidden" id="plot-cs-uid">
+                    
+                    <div class="form-group">
+                        <label>Nama Cleaner (CS)</label>
+                        <input type="text" id="plot-cs-nama" class="form-control" readonly style="background: #f1f3f5; font-weight: bold;">
+                    </div>
+                    <div class="form-group">
+                        <label>Pilih Area Penugasan</label>
+                        <select id="plot-pilih-area" class="form-control" required>
+                            <!-- Data area dari Firestore dimuat otomatis di sini -->
+                            <option value="">-- Memuat daftar area... --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Item Pekerjaan Checklist BM</label>
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 13px;">
+                            <label style="font-weight:normal;"><input type="checkbox" name="task-item" value="Sapu & Pel Lantai"> 🧹 Sapu & Pel Lantai</label><br>
+                            <label style="font-weight:normal;"><input type="checkbox" name="task-item" value="Lap Kaca & Dusting"> 🧽 Lap Kaca & Dusting</label><br>
+                            <label style="font-weight:normal;"><input type="checkbox" name="task-item" value="Kosongkan Tempat Sampah"> 🗑️ Kosongkan Tempat Sampah</label><br>
+                            <label style="font-weight:normal;"><input type="checkbox" name="task-item" value="Disinfektan / Pewangi"> 🧴 Disinfektan / Pewangi</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-block">Kirim Tugas ke CS</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation Bar -->
         <nav class="bottom-nav">
             <a href="#" class="nav-item active">
                 <span class="nav-icon">🏠</span>
@@ -121,7 +250,6 @@
         </nav>
     </div>
 
-    <!-- Hubungkan ke logika khusus Dashboard Team Leader -->
     <script type="module" src="js/dashboard-tl.js"></script>
 </body>
 </html>
