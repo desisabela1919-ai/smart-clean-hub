@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Smart Clean Hub</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+    <div class="mobile-container">
+        <!-- Header Dashboard Owner -->
+        <div class="dash-header">
+            <div class="user-info">
+                <span class="avatar">👑</span>
+                <div>
+                    <h3>Adriansyah (Owner)</h3>
+                    <p>Hak Akses: Super Admin</p>
+                </div>
+            </div>
+            <button id="btnLogout" class="btn-logout">Keluar</button>
+        </div>
+
+        <!-- Konten Utama Ringkasan Bisnis -->
+        <div class="dash-content">
+            
+            <!-- RINGKASAN MONITORING BISNIS -->
+            <section class="menu-section" style="margin-bottom: 25px;">
+                <h2>Ringkasan Operasional</h2>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
+                    <div style="background-color: var(--light-blue); padding: 15px; border-radius: 8px; text-align: center;">
+                        <p style="font-size: 0.8rem; color: #555; font-weight: 600;">Total Tim Aktif</p>
+                        <h3 id="total-karyawan" style="font-size: 1.5rem; color: var(--primary-blue); margin-top: 5px;">0</h3>
+                    </div>
+                    <div style="background-color: #e6f4ea; padding: 15px; border-radius: 8px; text-align: center;">
+                        <p style="font-size: 0.8rem; color: #555; font-weight: 600;">Hadir Hari Ini</p>
+                        <h3 id="total-hadir" style="font-size: 1.5rem; color: var(--success-green); margin-top: 5px;">0</h3>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MONITORING ABSENSI TIM REAL-TIME -->
+            <section class="menu-section">
+                <h2>Log Kehadiran Hari Ini</h2>
+                <div id="list-log-absen" class="list-container" style="margin-top: 10px;">
+                    <!-- Nama, Jam, & Foto selfie karyawan yang masuk hari ini otomatis muncul di sini -->
+                    <p class="empty-state">Belum ada tim yang melakukan absensi hari ini.</p>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Bottom Navigation Bar Khusus Admin -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Monitoring</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">👥</span>
+                <span class="nav-label">Kelola Tim</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-icon">📈</span>
+                <span class="nav-label">Laporan RKB</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Hubungkan ke logika penggerak data monitoring Admin -->
+    <script type="module" src="js/dashboard-admin.js"></script>
+</body>
+</html>
