@@ -49,16 +49,24 @@ if (btnLogout) {
 }
 
 // ==========================================
-// 2. HITUNG TOTAL KARYAWAN AKTIF DI DATABASE
+// 2. HITUNG TOTAL TIM AKTIF DI DATABASE (CS & TL)
 // ==========================================
 async function muatStatistikAdmin() {
     try {
+        // Hitung total Cleaner / CS aktif
         const qKaryawan = query(collection(db, "users"), where("role", "==", "karyawan"), where("status", "==", "approved"));
-        const snapshot = await getDocs(qKaryawan);
-        // Tampilkan jumlah karyawan aktif ke kotak summary
+        const snapshotKaryawan = await getDocs(qKaryawan);
         const totalKaryawanBadge = document.getElementById("total-karyawan");
         if (totalKaryawanBadge) {
-            totalKaryawanBadge.innerText = snapshot.size;
+            totalKaryawanBadge.innerText = snapshotKaryawan.size;
+        }
+
+        // Hitung total Team Leader (TL) aktif jika elemen badge-nya tersedia di HTML
+        const qTL = query(collection(db, "users"), where("role", "==", "tl"), where("status", "==", "approved"));
+        const snapshotTL = await getDocs(qTL);
+        const totalTLBadge = document.getElementById("total-tl"); // Pasang ID ini di HTML jika mau memunculkan angka TL
+        if (totalTLBadge) {
+            totalTLBadge.innerText = snapshotTL.size;
         }
     } catch (error) {
         console.error("Gagal memuat total tim:", error);
@@ -94,11 +102,15 @@ function pantauLogAbsensiHariIni() {
         querySnapshot.forEach((docSnap) => {
             const log = docSnap.data();
             
+            // Tambahkan label penunjuk role di log absen agar Owner tahu siapa yang absen (TL/CS)
+            const labelRoleAbsen = log.role === "tl" ? "👔 TL" : "🧹 CS";
+
             const cardLog = document.createElement("div");
             cardLog.className = "approve-card";
             cardLog.innerHTML = `
                 <div class="info">
-                    <h4>${log.nama} (${log.nik})</h4>
+                    <h4>${log.nama} [${labelRoleAbsen}]</h4>
+                    <p>NIK/WA: 0${log.nik ? log.nik.slice(2) : ''}</p>
                     <p>Jam Masuk: <b>${log.jam} WIB</b></p>
                 </div>
                 <button class="btn-approve" style="background-color: var(--accent-blue);" data-nama="${log.nama}" data-tipe="${log.tipe}" data-foto="${log.fotoUrl}" data-lat="${log.koordinat.lat}" data-lon="${log.koordinat.lon}">
@@ -109,7 +121,7 @@ function pantauLogAbsensiHariIni() {
             listLogContainer.appendChild(cardLog);
         });
 
-        // PERBAIKAN UTAMA: MODAL KLIK CEK BUKTI MENGGUNAKAN TRICK DOWNLOAD / LIHAT MAPS
+        // MODAL KLIK CEK BUKTI MENGGUNAKAN TRICK DOWNLOAD / LIHAT MAPS
         const btnBukti = document.querySelectorAll(".btn-approve");
         btnBukti.forEach(btn => {
             btn.addEventListener("click", (e) => {
@@ -131,31 +143,31 @@ function pantauLogAbsensiHariIni() {
                 linkDownload.click();
                 document.body.removeChild(linkDownload);
 
-                // 3. Otomatis bukakan peta lokasi penugasan di tab baru
-                window.open(`https://www.google.com/maps?q=${lat},${coords.lon || lon}`, '_blank');
+                // 3. Otomatis bukakan peta lokasi penugasan di tab baru (Perbaikan bug variabel coords)
+                window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank');
             });
         });
     });
 }
 
 // ==========================================
-// 4. PANTAU & SETUJUI PENDAFTARAN KARYAWAN BARU
+// 4. PANTAU & SETUJUI PENDAFTARAN KARYAWAN & TL BARU
 // ==========================================
 function pantauPendaftaranKaryawan() {
     const listPersetujuanContainer = document.getElementById("list-persetujuan-tim") || document.getElementById("list-log-absen");
     
     if (!listPersetujuanContainer) return;
 
+    // PERBAIKAN: Mengambil seluruh permohonan pendaftaran baru (pending) tanpa batas role
     const qPending = query(
         collection(db, "users"), 
-        where("role", "==", "karyawan"), 
         where("status", "==", "pending")
     );
 
     onSnapshot(qPending, (querySnapshot) => {
         if (querySnapshot.empty) {
             if (listPersetujuanContainer.id === "list-persetujuan-tim") {
-                listPersetujuanContainer.innerHTML = '<p class="empty-state">Tidak ada pengajuan akun karyawan baru.</p>';
+                listPersetujuanContainer.innerHTML = '<p class="empty-state">Tidak ada pengajuan akun baru.</p>';
             }
             return;
         }
@@ -165,12 +177,18 @@ function pantauPendaftaranKaryawan() {
         }
 
         querySnapshot.forEach((docSnap) => {
-            const dataKaryawan = docSnap.data();
+            const dataUser = docSnap.data();
             const docId = docSnap.id; 
+
+            // Penentuan Teks Badge Jabatan & Gaya Warna Visual secara Dinamis
+            const labelRole = dataUser.role === "tl" ? "👔 Team Leader (TL)" : "🧹 Cleaner / CS";
+            const warnaBgBadge = dataUser.role === "tl" ? "#cce5ff" : "#fff3cd";
+            const warnaTeksBadge = dataUser.role === "tl" ? "#004085" : "#856404";
+            const warnaGarisSamping = dataUser.role === "tl" ? "5px solid #007bff" : "5px solid #ffcc00";
 
             const cardApprove = document.createElement("div");
             cardApprove.className = "approve-card";
-            cardApprove.style.borderLeft = "5px solid #ffcc00"; 
+            cardApprove.style.borderLeft = warnaGarisSamping; 
             cardApprove.style.marginBottom = "10px";
             cardApprove.style.padding = "10px";
             cardApprove.style.backgroundColor = "#fff";
@@ -181,11 +199,18 @@ function pantauPendaftaranKaryawan() {
 
             cardApprove.innerHTML = `
                 <div class="info">
-                    <h4 style="margin:0; color:#333;">${dataKaryawan.nama}</h4>
-                    <p style="margin:5px 0 0 0; font-size:13px; color:#666;">WhatsApp: <b>0${dataKaryawan.whatsapp.slice(2)}</b></p>
-                    <span style="font-size:11px; background:#fff3cd; color:#856404; padding:2px 6px; border-radius:4px; display:inline-block; margin-top:5px;">Menunggu Persetujuan</span>
+                    <h4 style="margin:0; color:#333;">${dataUser.nama}</h4>
+                    <p style="margin:5px 0 0 0; font-size:13px; color:#666;">WhatsApp: <b>0${dataUser.whatsapp ? dataUser.whatsapp.slice(2) : ''}</b></p>
+                    <div style="margin-top: 5px; display: flex; gap: 5px;">
+                        <span style="font-size:11px; background:${warnaBgBadge}; color:${warnaTeksBadge}; padding:2px 6px; border-radius:4px; font-weight: bold; display:inline-block;">
+                            ${labelRole}
+                        </span>
+                        <span style="font-size:11px; background:#e2e3e5; color:#383d41; padding:2px 6px; border-radius:4px; display:inline-block;">
+                            Menunggu Persetujuan
+                        </span>
+                    </div>
                 </div>
-                <button class="btn-action-approve" data-id="${docId}" data-nama="${dataKaryawan.nama}" style="background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                <button class="btn-action-approve" data-id="${docId}" data-nama="${dataUser.nama}" data-role="${labelRole}" style="background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
                     Setujui ✔
                 </button>
             `;
@@ -196,21 +221,23 @@ function pantauPendaftaranKaryawan() {
         const tombolApprove = document.querySelectorAll(".btn-action-approve");
         tombolApprove.forEach(btn => {
             btn.addEventListener("click", async (e) => {
-                const uidKaryawan = e.target.getAttribute("data-id");
-                const namaKaryawan = e.target.getAttribute("data-nama");
+                const targetBtn = e.target.closest(".btn-action-approve");
+                const uidUser = targetBtn.getAttribute("data-id");
+                const namaUser = targetBtn.getAttribute("data-nama");
+                const jabatanUser = targetBtn.getAttribute("data-role");
 
-                const konfirmasi = confirm(`Apakah Anda yakin ingin menyetujui akun atas nama: ${namaKaryawan}?`);
+                const konfirmasi = confirm(`Apakah Anda yakin ingin menyetujui pendaftaran akun ${jabatanUser} atas nama: ${namaUser}?`);
                 if (konfirmasi) {
                     try {
-                        const userRef = doc(db, "users", uidKaryawan);
+                        const userRef = doc(db, "users", uidUser);
                         await updateDoc(userRef, {
                             status: "approved"
                         });
 
-                        alert(`✅ Akun ${namaKaryawan} berhasil disetujui! Karyawan sekarang sudah bisa login.`);
+                        alert(`✅ Akun ${namaUser} (${jabatanUser}) berhasil disetujui! Pengguna sekarang sudah bisa login.`);
                         muatStatistikAdmin(); 
                     } catch (err) {
-                        console.error("Gagal menyetujui karyawan:", err);
+                        console.error("Gagal menyetujui akun:", err);
                         alert("⚠️ Terjadi kesalahan saat menyetujui akun.");
                     }
                 }
