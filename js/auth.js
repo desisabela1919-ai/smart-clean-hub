@@ -6,29 +6,18 @@ import {
     onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { 
-    collection, 
-    query, 
-    where, 
-    getDocs,
     doc,
     getDoc 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Ambil elemen langsung berdasarkan ID Tombol yang ada di HTML Anda
 const btnLogin = document.getElementById("btnLogin");
 
 if (btnLogin) {
-    // Gunakan event click langsung pada tombol agar anti-gagal
     btnLogin.addEventListener("click", async (e) => {
         e.preventDefault();
 
         const idNikField = document.getElementById("login-nik");
         const passwordField = document.getElementById("login-password");
-
-        if (!idNikField || !passwordField) {
-            alert("⚠️ Sistem mendeteksi komponen input NIK atau Password di HTML salah ID!");
-            return;
-        }
 
         const inputNIK = idNikField.value.trim().toUpperCase();
         const inputPassword = passwordField.value;
@@ -41,38 +30,35 @@ if (btnLogin) {
         btnLogin.innerText = "⏳ Memproses Masuk...";
         btnLogin.disabled = true;
 
-        try {
-            // Cari data di Firestore berdasarkan NIK
-            const q = query(collection(db, "users"), where("nik", "==", inputNIK));
-            const querySnapshot = await getDocs(q);
+        // Tentukan email berdasarkan NIK inputan
+        let userEmail = "";
+        if (inputNIK === "OWNER01") {
+            userEmail = "admin@smartcleanhub.com";
+        } else {
+            userEmail = `${inputNIK.toLowerCase()}@smartcleanhub.com`;
+        }
 
-            if (querySnapshot.empty) {
-                alert("⚠️ ID / NIK tidak ditemukan di database!");
+        try {
+            // Langkah 1: Langsung verifikasi Email & Password ke Firebase Auth
+            const userCredential = await signInWithEmailAndPassword(auth, userEmail, inputPassword);
+            const user = userCredential.user;
+
+            // Langkah 2: Ambil data profil di Firestore langsung menggunakan User UID (Pasti Ketemu)
+            const docRef = doc(db, "users", user.uid);
+            const docSnap = await getDoc(docRef);
+
+            if (!docSnap.exists()) {
+                alert("⚠️ Akun Auth ada, tetapi data profil Anda di Firestore tidak ditemukan!");
                 btnLogin.innerText = "Masuk";
                 btnLogin.disabled = false;
                 return;
             }
 
-            let userEmail = "";
-            let userRole = "";
-            let userStatus = "";
+            const userData = docSnap.data();
+            const userRole = userData.role;
+            const userStatus = userData.status;
 
-            querySnapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                userRole = data.role;
-                userStatus = data.status;
-                
-                if (inputNIK === "OWNER01" || userRole === "admin") {
-                    userEmail = "admin@smartcleanhub.com";
-                } else {
-                    userEmail = `${inputNIK.toLowerCase()}@smartcleanhub.com`;
-                }
-            });
-
-            // Kirim data ke Firebase Auth
-            await signInWithEmailAndPassword(auth, userEmail, inputPassword);
-            
-            // Arahkan halaman sesuai role
+            // Langkah 3: Pengalihan Halaman sesuai Hak Akses (Role)
             if (userRole === "admin") {
                 window.location.href = "dashboard-admin.html";
             } else if (userRole === "tl") {
@@ -89,14 +75,15 @@ if (btnLogin) {
 
         } catch (error) {
             console.error("Login Eror:", error);
-            alert("⚠️ Kata sandi (Password) yang Anda masukkan salah!");
+            // Jika email/password salah atau user tidak terdaftar di Authentication
+            alert("⚠️ Login Gagal! ID/NIK atau Password yang Anda masukkan keliru.");
             btnLogin.innerText = "Masuk";
             btnLogin.disabled = false;
         }
     });
 }
 
-// Cek Sesi Aktif
+// Cek Sesi Aktif saat halaman dimuat
 onAuthStateChanged(auth, async (user) => {
     if (user && window.location.pathname.endsWith("index.html")) {
         try {
