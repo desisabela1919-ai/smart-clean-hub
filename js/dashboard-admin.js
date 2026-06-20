@@ -30,7 +30,7 @@ onAuthStateChanged(auth, async (user) => {
             // Jalankan semua fungsi monitoring admin jika sukses
             muatStatistikAdmin();
             pantauLogAbsensiHariIni();
-            pantauPendaftaranKaryawan(); // <--- Fungsi baru kita diaktifkan di sini
+            pantauPendaftaranKaryawan(); 
         }
     } else {
         window.location.href = "index.html";
@@ -101,7 +101,7 @@ function pantauLogAbsensiHariIni() {
                     <h4>${log.nama} (${log.nik})</h4>
                     <p>Jam Masuk: <b>${log.jam} WIB</b></p>
                 </div>
-                <button class="btn-approve" style="background-color: var(--accent-blue);" data-foto="${log.fotoUrl}" data-lat="${log.koordinat.lat}" data-lon="${log.koordinat.lon}">
+                <button class="btn-approve" style="background-color: var(--accent-blue);" data-nama="${log.nama}" data-tipe="${log.tipe}" data-foto="${log.fotoUrl}" data-lat="${log.koordinat.lat}" data-lon="${log.koordinat.lon}">
                     Cek Bukti
                 </button>
             `;
@@ -109,30 +109,43 @@ function pantauLogAbsensiHariIni() {
             listLogContainer.appendChild(cardLog);
         });
 
+        // PERBAIKAN UTAMA: MODAL KLIK CEK BUKTI MENGGUNAKAN TRICK DOWNLOAD / LIHAT MAPS
         const btnBukti = document.querySelectorAll(".btn-approve");
         btnBukti.forEach(btn => {
             btn.addEventListener("click", (e) => {
-                const urlFoto = e.target.getAttribute("data-foto");
-                const lat = e.target.getAttribute("data-lat");
-                const lon = e.target.getAttribute("data-lon");
+                const targetBtn = e.target.closest(".btn-approve");
+                const namaTim = targetBtn.getAttribute("data-nama");
+                const tipeAbsen = targetBtn.getAttribute("data-tipe");
+                const urlFotoBase64 = targetBtn.getAttribute("data-foto");
+                const lat = targetBtn.getAttribute("data-lat");
+                const lon = targetBtn.getAttribute("data-lon");
                 
-                alert(`Buka Bukti Absen:\nKoordinat GPS: ${lat}, ${lon}\n\nKlik OK untuk melihat foto selfie tim.`);
-                window.open(urlFoto, '_blank');
+                // 1. Tampilkan info koordinat GPS & sediakan link Google Maps
+                alert(`📍 Log Absen: ${namaTim}\nKoordinat GPS: ${lat}, ${lon}\n\nKlik OK untuk mengunduh foto selfie secara instan.`);
+                
+                // 2. Trik download paksa berkas Base64 menjadi file gambar .jpg asli di laptop
+                const linkDownload = document.createElement("a");
+                linkDownload.href = urlFotoBase64;
+                linkDownload.download = `Selfie_${namaTim}_${tipeAbsen}_${new Date().toISOString().slice(0,10)}.jpg`;
+                document.body.appendChild(linkDownload);
+                linkDownload.click();
+                document.body.removeChild(linkDownload);
+
+                // 3. Otomatis bukakan peta lokasi penugasan di tab baru
+                window.open(`https://www.google.com/maps?q=${lat},${coords.lon || lon}`, '_blank');
             });
         });
     });
 }
 
 // ==========================================
-// 4. PANTAU & SETUJUI PENDAFTARAN KARYAWAN BARU (BARU)
+// 4. PANTAU & SETUJUI PENDAFTARAN KARYAWAN BARU
 // ==========================================
 function pantauPendaftaranKaryawan() {
-    // Cari container daftar persetujuan tim (Sesuaikan ID-nya jika ada di HTML Kelola Tim Anda)
     const listPersetujuanContainer = document.getElementById("list-persetujuan-tim") || document.getElementById("list-log-absen");
     
     if (!listPersetujuanContainer) return;
 
-    // Ambil user yang rolenya 'karyawan' dan statusnya masih 'pending'
     const qPending = query(
         collection(db, "users"), 
         where("role", "==", "karyawan"), 
@@ -140,27 +153,24 @@ function pantauPendaftaranKaryawan() {
     );
 
     onSnapshot(qPending, (querySnapshot) => {
-        // Jika kita sedang di halaman utama dasbor (bukan halaman kelola tim) dan ingin menggabungkan tampilannya
         if (querySnapshot.empty) {
-            // Jika container ini dipakai bersama, jangan hapus log absensi hari ini
             if (listPersetujuanContainer.id === "list-persetujuan-tim") {
                 listPersetujuanContainer.innerHTML = '<p class="empty-state">Tidak ada pengajuan akun karyawan baru.</p>';
             }
             return;
         }
 
-        // Jika halaman Kelola Tim terpisah, bersihkan dulu layarnya
         if (listPersetujuanContainer.id === "list-persetujuan-tim") {
             listPersetujuanContainer.innerHTML = "";
         }
 
         querySnapshot.forEach((docSnap) => {
             const dataKaryawan = docSnap.data();
-            const docId = docSnap.id; // Ini adalah UID akun karyawan tersebut
+            const docId = docSnap.id; 
 
             const cardApprove = document.createElement("div");
             cardApprove.className = "approve-card";
-            cardApprove.style.borderLeft = "5px solid #ffcc00"; // Tanda warna kuning untuk pending
+            cardApprove.style.borderLeft = "5px solid #ffcc00"; 
             cardApprove.style.marginBottom = "10px";
             cardApprove.style.padding = "10px";
             cardApprove.style.backgroundColor = "#fff";
@@ -180,11 +190,9 @@ function pantauPendaftaranKaryawan() {
                 </button>
             `;
 
-            // Masukkan kartu pendaftaran ke tumpukan paling atas container
             listPersetujuanContainer.insertBefore(cardApprove, listPersetujuanContainer.firstChild);
         });
 
-        // Daftarkan fungsi Klik Tombol Setujui
         const tombolApprove = document.querySelectorAll(".btn-action-approve");
         tombolApprove.forEach(btn => {
             btn.addEventListener("click", async (e) => {
@@ -194,14 +202,13 @@ function pantauPendaftaranKaryawan() {
                 const konfirmasi = confirm(`Apakah Anda yakin ingin menyetujui akun atas nama: ${namaKaryawan}?`);
                 if (konfirmasi) {
                     try {
-                        // Ubah status "pending" menjadi "approved" langsung di Firestore
                         const userRef = doc(db, "users", uidKaryawan);
                         await updateDoc(userRef, {
                             status: "approved"
                         });
 
                         alert(`✅ Akun ${namaKaryawan} berhasil disetujui! Karyawan sekarang sudah bisa login.`);
-                        muatStatistikAdmin(); // Perbarui angka ringkasan di dashboard
+                        muatStatistikAdmin(); 
                     } catch (err) {
                         console.error("Gagal menyetujui karyawan:", err);
                         alert("⚠️ Terjadi kesalahan saat menyetujui akun.");
