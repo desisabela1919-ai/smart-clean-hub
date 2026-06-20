@@ -1,0 +1,190 @@
+/* css/dashboard.css */
+
+/* Bagian Atas Dashboard */
+.dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+    margin-bottom: 20px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-info .avatar {
+    font-size: 2rem;
+    background-color: var(--light-blue);
+    padding: 8px;
+    border-radius: 50%;
+}
+
+.user-info h3 {
+    color: var(--primary-blue);
+    font-size: 1.1rem;
+}
+
+.user-info p {
+    font-size: 0.85rem;
+    color: #777;
+}
+
+.btn-logout {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Pengaturan Judul Seksi & Badge Angka */
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.menu-section h2 {
+    font-size: 1.2rem;
+    color: var(--dark-grey);
+}
+
+.badge-count {
+    background-color: var(--pending-yellow);
+    color: var(--dark-grey);
+    font-weight: bold;
+    font-size: 0.85rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+
+/* Container List Pengajuan Karyawan */
+.list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.empty-state {
+    text-align: center;
+    color: #aaa;
+    font-size: 0.9rem;
+    padding: 15px;
+    border: 1.5px dashed #ddd;
+    border-radius: 8px;
+}
+
+/* Kartu List Pending */
+.approve-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.approve-card .info h4 {
+    color: var(--dark-grey);
+    font-size: 1rem;
+}
+
+.approve-card .info p {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.btn-approve {
+    background-color: var(--success-green);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Grid Menu Operasional */
+.grid-menu {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 15px;
+    margin-bottom: 80px; /* Jarak agar tidak tertutup bottom nav */
+}
+
+.menu-card {
+    background-color: var(--light-blue);
+    border: 1px solid rgba(0, 86, 179, 0.1);
+    border-radius: 12px;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.menu-card:active {
+    transform: scale(0.95);
+}
+
+.menu-card .icon {
+    font-size: 2rem;
+}
+
+.menu-card span:last-child {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-blue);
+}
+
+/* Navigasi Menu Bagian Bawah (Bottom Nav) */
+.bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background-color: var(--pure-white);
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 10;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #888;
+    gap: 2px;
+}
+
+.nav-item.active {
+    color: var(--primary-blue);
+}
+
+.nav-icon {
+    font-size: 1.3rem;
+}
+
+.nav-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
