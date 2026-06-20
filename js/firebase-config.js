@@ -3,7 +3,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-// Isi tanda kutip di bawah ini dengan data asli dari konsol Firebase Anda nanti.
+// Konfigurasi asli Firebase Smart Clean Hub Anda
 const firebaseConfig = {
   apiKey: "AIzaSyAvrdcUo1Z8iJYNAaYdgfSAGPBdEM9DJjw",
   authDomain: "smart-clean-hub-7315d.firebaseapp.com",
@@ -17,7 +17,9 @@ const firebaseConfig = {
 // Inisialisasi Firebase
 const app = initializeApp(firebaseConfig);
 
-// Ekspor fungsi agar siap dipakai di file JavaScript halaman lainnya secara terpisah
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+// Format ekspor disesuaikan agar cocok 100% dengan file js/auth.js
+export { auth, db, storage };
