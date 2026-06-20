@@ -11,6 +11,7 @@
 <body>
 
     <div class="mobile-container">
+        <!-- Header Auth -->
         <div class="auth-header">
             <div class="logo">🛡️ SCH</div>
             <h1>Pendaftaran Akun</h1>
@@ -38,6 +39,7 @@
                 <input type="password" id="regPasswordConfirm" placeholder="Ulangi password Anda" required>
             </div>
 
+            <!-- PILIHAN JABATAN / ROLE -->
             <div class="input-group">
                 <label for="regRole">Pilih Jabatan / Posisi</label>
                 <select id="regRole" required style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; background-color: #fff; box-sizing: border-box; font-family: inherit; color: #333;">
@@ -46,6 +48,7 @@
                 </select>
             </div>
 
+            <!-- Tombol submit -->
             <button type="submit" class="btn-primary" id="register-btn">Ajukan Pendaftaran</button>
         </form>
 
@@ -55,6 +58,7 @@
         </div>
     </div>
 
+    <!-- Script logika pendaftaran -->
     <script type="module" src="js/register.js"></script>
 </body>
 </html>
