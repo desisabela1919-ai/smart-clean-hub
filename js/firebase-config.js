@@ -5,12 +5,13 @@ import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-s
 
 // Isi tanda kutip di bawah ini dengan data asli dari konsol Firebase Anda nanti.
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY_HERE",
-    authDomain: "smart-clean-hub.firebaseapp.com",
-    projectId: "smart-clean-hub",
-    storageBucket: "smart-clean-hub.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID_HERE",
-    appId: "YOUR_APP_ID_HERE"
+  apiKey: "AIzaSyAvrdcUo1Z8iJYNAaYdgfSAGPBdEM9DJjw",
+  authDomain: "smart-clean-hub-7315d.firebaseapp.com",
+  projectId: "smart-clean-hub-7315d",
+  storageBucket: "smart-clean-hub-7315d.firebasestorage.app",
+  messagingSenderId: "211576643760",
+  appId: "1:211576643760:web:797910c3404c4828215b75",
+  measurementId: "G-XVR0ERJ93R"
 };
 
 // Inisialisasi Firebase
