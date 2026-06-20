@@ -14,32 +14,45 @@ import {
     getDoc 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const loginForm = document.getElementById("login-form");
+// Ambil elemen langsung berdasarkan ID Tombol yang ada di HTML Anda
+const btnLogin = document.getElementById("btnLogin");
 
-if (loginForm) {
-    loginForm.addEventListener("submit", async (e) => {
+if (btnLogin) {
+    // Gunakan event click langsung pada tombol agar anti-gagal
+    btnLogin.addEventListener("click", async (e) => {
         e.preventDefault();
 
-        const inputNIK = document.getElementById("login-nik").value.trim().toUpperCase();
-        const inputPassword = document.getElementById("login-password").value;
-        const submitBtn = e.target.querySelector("button[type='submit']");
+        const idNikField = document.getElementById("login-nik");
+        const passwordField = document.getElementById("login-password");
 
-        submitBtn.innerText = "⏳ Memproses Masuk...";
-        submitBtn.disabled = true;
+        if (!idNikField || !passwordField) {
+            alert("⚠️ Sistem mendeteksi komponen input NIK atau Password di HTML salah ID!");
+            return;
+        }
+
+        const inputNIK = idNikField.value.trim().toUpperCase();
+        const inputPassword = passwordField.value;
+
+        if (inputNIK === "" || inputPassword === "") {
+            alert("⚠️ Harap isi NIK dan Password Anda terlebih dahulu!");
+            return;
+        }
+
+        btnLogin.innerText = "⏳ Memproses Masuk...";
+        btnLogin.disabled = true;
 
         try {
-            // STRATEGI BARU: Cari data di Firestore berdasarkan NIK terlebih dahulu
+            // Cari data di Firestore berdasarkan NIK
             const q = query(collection(db, "users"), where("nik", "==", inputNIK));
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {
                 alert("⚠️ ID / NIK tidak ditemukan di database!");
-                submitBtn.innerText = "Masuk";
-                submitBtn.disabled = false;
+                btnLogin.innerText = "Masuk";
+                btnLogin.disabled = false;
                 return;
             }
 
-            // Jika NIK ditemukan, ambil data email virtualnya (atau pakai default jika admin)
             let userEmail = "";
             let userRole = "";
             let userStatus = "";
@@ -49,19 +62,17 @@ if (loginForm) {
                 userRole = data.role;
                 userStatus = data.status;
                 
-                // Jika Anda admin, pasangkan dengan email admin resmi Anda
                 if (inputNIK === "OWNER01" || userRole === "admin") {
                     userEmail = "admin@smartcleanhub.com";
                 } else {
-                    // Untuk karyawan, kita buatkan email virtual berbasis NIK otomatis
                     userEmail = `${inputNIK.toLowerCase()}@smartcleanhub.com`;
                 }
             });
 
-            // Eksekusi verifikasi password ke Firebase Authentication
+            // Kirim data ke Firebase Auth
             await signInWithEmailAndPassword(auth, userEmail, inputPassword);
             
-            // Pengalihan halaman otomatis sesuai Role setelah sukses login
+            // Arahkan halaman sesuai role
             if (userRole === "admin") {
                 window.location.href = "dashboard-admin.html";
             } else if (userRole === "tl") {
@@ -71,21 +82,21 @@ if (loginForm) {
                     window.location.href = "dashboard-cs.html";
                 } else {
                     alert("⏳ Akun Anda masih dalam antrean persetujuan (Pending) oleh Team Leader.");
-                    submitBtn.innerText = "Masuk";
-                    submitBtn.disabled = false;
+                    btnLogin.innerText = "Masuk";
+                    btnLogin.disabled = false;
                 }
             }
 
         } catch (error) {
             console.error("Login Eror:", error);
             alert("⚠️ Kata sandi (Password) yang Anda masukkan salah!");
-            submitBtn.innerText = "Masuk";
-            submitBtn.disabled = false;
+            btnLogin.innerText = "Masuk";
+            btnLogin.disabled = false;
         }
     });
 }
 
-// Proteksi Halaman: Jika sudah login, dilarang kembali ke index.html sebelum logout
+// Cek Sesi Aktif
 onAuthStateChanged(auth, async (user) => {
     if (user && window.location.pathname.endsWith("index.html")) {
         try {
@@ -97,7 +108,7 @@ onAuthStateChanged(auth, async (user) => {
                 if (userData.role === "karyawan" && userData.status === "approved") window.location.href = "dashboard-cs.html";
             }
         } catch (err) {
-            console.log("Sesi cek aman.");
+            console.log("Sesi aman.");
         }
     }
 });
