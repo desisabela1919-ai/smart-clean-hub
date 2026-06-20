@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Smart Clean Hub</title>
+    
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+    <div class="mobile-container">
+        <div class="auth-header">
+            <div class="logo">🛡️ SCH</div>
+            <h1>Smart Clean Hub</h1>
+            <p>Sistem Operasional Digital Cleaning Service</p>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+            <div class="input-group">
+                <label for="usernameNIK">ID / NIK Karyawan</label>
+                <input type="text" id="usernameNIK" placeholder="Contoh: CS001 atau TL001" required>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Masukkan password Anda" required>
+            </div>
+
+            <button type="submit" class="btn-primary" id="btnLogin">Masuk</button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Karyawan baru belum punya akun?</p>
+            <a href="register.html">Ajukan Pendaftaran Akun</a>
+        </div>
+    </div>
+
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>
